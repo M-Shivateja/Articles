@@ -7,6 +7,7 @@ function Main() {
   const [articles, setArticles] = useState([]);
   const [sortedArticles, setSortedArticles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
   const itemsPerPage = 12;
 
   useEffect(() => {
@@ -29,10 +30,16 @@ function Main() {
     fetchArticles();
   }, []);
 
+  const searchArticles = (
+    sortedArticles.length > 0 ? sortedArticles : articles
+  ).filter((article) =>
+    article.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   const getPaginatedData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return sortedArticles.slice(startIndex, endIndex);
+    return searchArticles.slice(startIndex, endIndex);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -56,9 +63,18 @@ function Main() {
     setCurrentPage(1);
   };
 
+  const handleSearch = (query) => {
+    setSearch(query);
+    setCurrentPage(1);
+  };
+
   return (
     <>
-      <Header onSort={handleSort} />
+      <Header
+        onSort={handleSort}
+        onSearch={handleSearch}
+        searchValue={search}
+      />
 
       <div className="md:mx-40 grid gap-4 grid-cols-[repeat(auto-fill,_minmax(250px,_2fr))]">
         {getPaginatedData().map((article) => (
@@ -75,7 +91,7 @@ function Main() {
       </div>
 
       <Pagination
-        totalItems={sortedArticles.length}
+        totalItems={searchArticles.length}
         itemsPerPage={itemsPerPage}
         currentPage={currentPage}
         onPageChange={handlePageChange}

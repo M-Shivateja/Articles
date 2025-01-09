@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function Header({ onSort }) {
+function Header({ onSort, onSearch, searchValue }) {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const handleSort = (order) => {
@@ -19,6 +19,8 @@ function Header({ onSort }) {
           type="text"
           placeholder="Search..."
           className="sm:w-96 px-4 py-1 rounded-full border bg-gray-100 text-black placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
+          value={searchValue}
+          onChange={(e) => onSearch(e.target.value)}
         />
       </div>
 
