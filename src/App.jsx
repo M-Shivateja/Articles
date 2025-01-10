@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import Main from "./Pages/Main";
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter className="bg-black">
       <Main />
     </BrowserRouter>
   );
