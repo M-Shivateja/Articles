@@ -2,10 +2,15 @@ import React from "react";
 
 function ArticleCard({ article }) {
   return (
-    <div className="flex flex-col items-start mt-5 gap-4  border-primary mx-4 shadow-inner rounded-2xl p-4 border hover:bg-terinary/40">
-      <h2 className="font-bold text-lg">{article.headline}</h2>
-      <h3 className="text-gray-600">{article.label}</h3>
-      <p className="text-gray-700 text-sm">{article.desc}</p>
+    <div className="border rounded-2xl shadow-lg flex flex-col items-start mt-5 gap-4 bg-white/80  mx-4  p-4 border hover:bg-terinary/60">
+      <h1 className="font-bold text-2xl">{article.headline}</h1>
+      <p className="text-important_text  text-md">{article.desc}</p>
+      <div className="flex gap-3">
+        <h3 className="text-gray-600">{article.label}</h3>
+        <h3 className="text-sm text-gray-600">Date : {article.my}</h3>
+      </div>
+
+      <h3>By {article.author}</h3>
       <a
         href={`https://${article.preView}`}
         target="_blank"

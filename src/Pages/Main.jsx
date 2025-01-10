@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from "react";
 import ArticleCard from "../Components/ArticleCard";
 import Pagination from "../Components/Pagination";
-import Header from "./Header";
+import NavBar from "./NavBar";
+import { fetchAllData } from "../../Api/Api";
 
 function Main() {
   const [articles, setArticles] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [sortedArticles, setSortedArticles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
-  const itemsPerPage = 12;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/posts"
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
+        const data = await fetchAllData();
         setArticles(data);
         setSortedArticles(data);
       } catch (err) {
@@ -32,9 +28,12 @@ function Main() {
 
   const searchArticles = (
     sortedArticles.length > 0 ? sortedArticles : articles
-  ).filter((article) =>
-    article.title.toLowerCase().includes(search.toLowerCase())
-  );
+  ).filter((article) => {
+    const keywords = article.keywords || [];
+    return keywords.some((keyword) =>
+      keyword.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   const getPaginatedData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -48,14 +47,14 @@ function Main() {
 
   const handleSort = (order) => {
     const sorted = [...articles].sort((a, b) => {
-      if (order === "asc") {
-        return a.title.localeCompare(b.title);
-      } else if (order === "desc") {
-        return b.title.localeCompare(a.title);
+      if (order === "latest") {
+        return new Date(b.date_published) - new Date(a.date_published);
+      } else if (order === "Old") {
+        return new Date(a.date_published) - new Date(b.date_published);
       } else if (order === "idAsc") {
-        return a.id - b.id;
+        return a.citations - b.citations;
       } else if (order === "idDesc") {
-        return b.id - a.id;
+        return b.citations - a.citations;
       }
       return 0;
     });
@@ -70,20 +69,68 @@ function Main() {
 
   return (
     <>
-      <Header
-        onSort={handleSort}
-        onSearch={handleSearch}
-        searchValue={search}
-      />
+      <NavBar onSearch={handleSearch} searchValue={search} />
 
-      <div className="md:mx-40 grid gap-4 grid-cols-[repeat(auto-fill,_minmax(250px,_2fr))]">
+      <header className="sticky top-12 bg-white/10 backdrop-blur-sm">
+        <div className="flex justify-center items-center py-6 gap-4 w-full mb-2 sm:mb-0 ">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="sm:w-96 px-4 py-1 rounded-full border border-primary/30 bg-gray-100 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+          <div>
+            <button
+              className="text-white px-6 py-1 bg-secondary font-bold duration-200 rounded-full hover:bg-terinary hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
+              Filter
+            </button>
+            {filterOpen && (
+              <div className="absolute border mt-1 sm:mt-2 w-20  sm:w-48   font-bold text-sm sm:text-xl bg-highlight_background rounded-md shadow-lg overflow-hidden z-20">
+                <ul>
+                  <li
+                    className="px-2 py-2 hover:bg-gray-500 text-center cursor-pointer"
+                    onClick={() => handleSort("latest")}
+                  >
+                    Latest
+                  </li>
+                  <li
+                    className="px-2 py-2 hover:bg-gray-500 text-center cursor-pointer"
+                    onClick={() => handleSort("old")}
+                  >
+                    Old
+                  </li>
+                  <li
+                    className="px-2 py-2 hover:bg-gray-500 text-center cursor-pointer"
+                    onClick={() => handleSort("idAsc")}
+                  >
+                    Citations S to L
+                  </li>
+                  <li
+                    className="px-2 py-2 hover:bg-gray-500 text-center cursor-pointer"
+                    onClick={() => handleSort("idDesc")}
+                  >
+                    Citations L to S
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="md:mx-40 mt-0 sm:mt-6 grid gap-4 grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))]">
         {getPaginatedData().map((article) => (
           <ArticleCard
-            key={article.id}
+            key={article._id}
             article={{
               headline: article.title,
-              label: `ID: ${article.id}`,
-              desc: article.body,
+              label: `citations : ${article.citations}`,
+              my: article.date_published,
+              desc: article.subtitle,
+              author: article.author,
               preView: article.website || "https://example.com",
             }}
           />
